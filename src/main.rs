@@ -8,7 +8,7 @@ extern crate serde;
 extern crate serde_derive;
 
 use sensehat_screen::{PixelColor, PixelFrame};
-use sensehat_screen::framebuffer::FramebufferError;
+use sensehat_screen::error::ScreenError;
 
 fn main() {
     env_logger::init();
@@ -49,7 +49,7 @@ impl MonitorState {
     }
 }
 
-fn show_state(state: MonitorState) -> Result<(), FramebufferError> {
+fn show_state(state: MonitorState) -> Result<(), ScreenError> {
     eprintln!("Status is {:?}", state);
     let mut screen =
         sensehat_screen::Screen::open("/dev/fb1")?;
