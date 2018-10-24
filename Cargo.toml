@@ -5,6 +5,7 @@ authors = ["pi"]
 
 [dependencies]
 env_logger = "*"
+lazy_static = "*"
 log = "0.4.5"
 sensehat-screen = "0.2.2"
 reqwest = "0.9.3"
