@@ -6,7 +6,6 @@ authors = ["pi"]
 [dependencies]
 env_logger = "*"
 log = "0.4.5"
-sensehat = { version = "1.1.0", optional = true }
 sensehat-screen = { version = "=0.2.0" }
 reqwest = "0.9.3"
 serde = "1.0.80"
