@@ -21,7 +21,7 @@ fn main() {
     let state = Arc::new(Mutex::new(MonitorState::Unknown));
     let readstate = state.clone();
     thread::spawn(move || -> () {
-        let interval = Duration::from_millis(125);
+        let interval = Duration::from_millis(234);
         for i in (0..12).cycle() {
             let state: MonitorState = readstate.lock().unwrap().clone();
             show_state(state, i)
@@ -34,7 +34,7 @@ fn main() {
     });
     loop {
         *state.lock().unwrap() = MonitorState::load();
-        sleep(Duration::from_millis(1111));
+        sleep(Duration::from_millis(3456));
     }
 }
 
