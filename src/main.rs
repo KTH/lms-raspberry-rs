@@ -9,32 +9,51 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 
-use sensehat_screen::{PixelColor, PixelFrame};
 use sensehat_screen::error::ScreenError;
 use sensehat_screen::frame::rotate::Rotate;
-use std::sync::{Arc, Mutex};
+use sensehat_screen::{PixelColor, PixelFrame};
+use std::sync::Mutex;
 use std::thread::{self, sleep};
 use std::time::Duration;
 
 fn main() {
     env_logger::init();
-    let state = Arc::new(Mutex::new(MonitorState::Unknown));
-    let readstate = state.clone();
+    let check_interval = Duration::from_millis(3456);
+    let frame_interval = Duration::from_millis(234);
+
     thread::spawn(move || -> () {
-        let interval = Duration::from_millis(234);
         for i in (0..12).cycle() {
-            let state: MonitorState = readstate.lock().unwrap().clone();
+            let state = get_state();
             show_state(state, i)
                 .map_err(|e| {
                     error!("Failed to show state: {:?}", e);
                 })
                 .ok();
-            sleep(interval);
+            sleep(frame_interval);
         }
     });
     loop {
-        *state.lock().unwrap() = MonitorState::load();
-        sleep(Duration::from_millis(3456));
+        set_state(MonitorState::load());
+        sleep(check_interval);
+    }
+}
+
+lazy_static! {
+    static ref CURRENT_STATE: Mutex<MonitorState> = Mutex::new(MonitorState::Unknown);
+}
+
+fn get_state() -> MonitorState {
+    CURRENT_STATE
+        .lock()
+        .map(|s| s.clone())
+        .unwrap_or(MonitorState::Unknown)
+}
+
+fn set_state(state: MonitorState) {
+    if let Ok(mut current_state) = CURRENT_STATE.lock() {
+        *current_state = state;
+    } else {
+        error!("Failed to get lock on current state");
     }
 }
 
