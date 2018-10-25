@@ -54,20 +54,22 @@ struct SrcStatus {
 
 impl MonitorState {
     fn load() -> Self {
-        let mut resp = reqwest::get("https://app-r.referens.sys.kth.se/lms-monitor-of-monitor/api").unwrap();
-        if resp.status().is_success() {
-            let statuses : Vec<SrcStatus> = resp.json().unwrap();
-            debug!("Statuses is: {:?}", statuses);
-            if statuses.iter().any(|s| s.color == "red") {
-                MonitorState::Sad
-            } else if statuses.iter().all(|s| s.color == "blue") {
-                MonitorState::Happy
-            } else {
-                MonitorState::Neutral
-            }
-        } else {
-            MonitorState::Unknown
-        }
+        reqwest::get("https://app-r.referens.sys.kth.se/lms-monitor-of-monitor/api")
+            .and_then(|mut resp| resp.json())
+            .map(|statuses: Vec<SrcStatus>| {
+                debug!("Statuses is: {:?}", statuses);
+                if statuses.iter().any(|s| s.color == "red") {
+                    MonitorState::Sad
+                } else if statuses.iter().all(|s| s.color == "blue") {
+                    MonitorState::Happy
+                } else {
+                    MonitorState::Neutral
+                }
+            })
+            .map_err(|e| {
+                warn!("Failed to get status: {:?}", e);
+            })
+            .unwrap_or(MonitorState::Unknown)
     }
 }
 
